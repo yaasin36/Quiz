@@ -103,7 +103,7 @@
   <body
     class="min-h-screen flex items-center justify-center p-3 sm:p-6 bg-slate-950 relative overflow-x-hidden text-slate-200 selection:bg-sky-500/30 selection:text-sky-200"
   >
-    <!-- Animated Background Blobs (Dark Mode Adjustments) -->
+    <!-- Animated Background Blobs -->
     <div
       class="fixed inset-0 w-full h-full overflow-hidden pointer-events-none z-0"
     >
@@ -124,7 +124,7 @@
       class="fixed top-4 right-4 sm:top-6 sm:right-6 z-50 flex flex-col gap-3 w-[calc(100%-2rem)] sm:w-auto max-w-sm pointer-events-none"
     ></div>
 
-    <!-- Main Form Card (Dark Glassmorphism) -->
+    <!-- Main Form Card -->
     <div
       class="w-full max-w-2xl bg-slate-900/80 backdrop-blur-2xl rounded-2xl sm:rounded-[2.5rem] shadow-[0_8px_30px_rgb(0,0,0,0.5)] border border-slate-700/50 overflow-hidden relative z-10"
     >
@@ -133,7 +133,7 @@
         class="p-5 sm:p-8 pb-5 sm:pb-8 border-b border-slate-700/50 relative overflow-hidden bg-slate-900/50"
       >
         <div class="relative z-10 flex flex-col items-center text-center">
-          <!-- Logo SMA Al Azhar 15 (No Background, direct image) -->
+          <!-- Logo -->
           <div
             class="mb-3 sm:mb-5 transform transition hover:scale-105 duration-300"
           >
@@ -148,7 +148,6 @@
               "
             />
           </div>
-
           <h1
             class="text-xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-500 mb-1.5 sm:mb-2"
           >
@@ -643,11 +642,10 @@
     </div>
 
     <script>
-      // URL API Google Apps Script Anda (Sudah terpasang)
+      // URL API Google Apps Script Anda (Sudah terpasang dari script Anda)
       const scriptURL =
         "https://script.google.com/macros/s/AKfycbzpND4Y_5kFKw54lP4vxDVXI6H2a_t15G3vkLE0bP9m1Jd0HFG7oF5pVS__e7fckZ1yGg/exec";
 
-      // Custom Modern Toast Notification (Dark mode adjusted)
       function showToast(message, type = "warning") {
         const container = document.getElementById("toast-container");
         const toast = document.createElement("div");
@@ -662,20 +660,15 @@
         }
 
         toast.className = `flex items-center gap-3 px-4 py-3 sm:px-5 sm:py-4 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.5)] ${bgClass} transform transition-all duration-300 translate-x-[120%] opacity-0 pointer-events-auto`;
-        toast.innerHTML = `
-                <div class="flex-shrink-0">${icon}</div>
-                <div class="font-medium text-sm sm:text-base leading-snug">${message}</div>
-            `;
+        toast.innerHTML = `<div class="flex-shrink-0">${icon}</div><div class="font-medium text-sm sm:text-base leading-snug">${message}</div>`;
 
         container.appendChild(toast);
 
-        // Entry animation
         requestAnimationFrame(() => {
           toast.style.transform = "translateX(0)";
           toast.style.opacity = "1";
         });
 
-        // Exit animation
         setTimeout(() => {
           toast.style.transform = "translate-x-[120%]";
           toast.style.opacity = "0";
@@ -683,7 +676,6 @@
         }, 4000);
       }
 
-      // Logic for transitioning to slide 2
       function nextSlide() {
         const nama = document.getElementById("nama").value.trim();
         const kelas = document.querySelector('input[name="kelas"]:checked');
@@ -702,45 +694,48 @@
         const slide2 = document.getElementById("slide2");
         slide2.classList.remove("slide-hidden");
         slide2.classList.add("animate-fade-in");
-
-        // Update Progress Bar
         document.getElementById("progressBar").style.width = "100%";
-
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
-      // Logic for transitioning back to slide 1
       function prevSlide() {
         document.getElementById("slide2").classList.add("slide-hidden");
         const slide1 = document.getElementById("slide1");
         slide1.classList.remove("slide-hidden");
         slide1.classList.add("animate-fade-in");
-
-        // Update Progress Bar
         document.getElementById("progressBar").style.width = "50%";
         window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
-      // Logic for handling form submission via API
       function submitForm(event) {
         event.preventDefault();
 
-        // Hide form, show loading
+        // UI Updates: Hide form, show loading
         document.getElementById("slide2").classList.add("slide-hidden");
         document
           .getElementById("progressBar")
           .parentElement.classList.add("hidden");
-
         const loading = document.getElementById("loadingState");
         loading.classList.remove("hidden");
         loading.classList.add("flex");
 
+        // Prepare data from form
         const form = document.getElementById("quizForm");
         const formData = new FormData(form);
 
-        // Fetch request to Google Apps Script
-        fetch(scriptURL, { method: "POST", body: formData })
-          .then((response) => {
+        // PERBAIKAN: Format data menjadi URL-Encoded agar mudah ditangkap GAS
+        const urlEncodedData = new URLSearchParams(formData).toString();
+
+        // Fetch request
+        fetch(scriptURL, {
+          method: "POST",
+          body: urlEncodedData,
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        })
+          .then((response) => response.json()) // Opsional: pastikan return json
+          .then((data) => {
             loading.classList.add("hidden");
             loading.classList.remove("flex");
             document
@@ -749,7 +744,10 @@
           })
           .catch((error) => {
             console.error("Error!", error.message);
-            showToast("Yah, koneksi terputus. Coba kirim lagi ya!", "error");
+            showToast(
+              "Yah, koneksi terputus atau Google Apps Script belum diperbarui (Deploy).",
+              "error",
+            );
 
             loading.classList.add("hidden");
             loading.classList.remove("flex");
@@ -760,7 +758,6 @@
           });
       }
 
-      // Logic to reset the entire UI for a new submission
       function resetForm() {
         document.getElementById("quizForm").reset();
         document.getElementById("successMessage").classList.add("hidden");
